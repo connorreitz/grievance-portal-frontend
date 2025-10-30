@@ -44,7 +44,7 @@ const Index = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          grievance: data.grievance,
+          message: data.grievance,
           severity: data.severity,
           date: data.date,
           submittedAt: new Date().toISOString(),
