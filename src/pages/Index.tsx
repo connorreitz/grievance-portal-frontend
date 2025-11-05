@@ -24,6 +24,9 @@ type GrievanceFormValues = z.infer<typeof grievanceSchema>;
 const publishEndpoint =  "https://m5z5ph9dud.execute-api.us-east-2.amazonaws.com/Prod/publish"
 const countEndpoint = "https://m5z5ph9dud.execute-api.us-east-2.amazonaws.com/Prod/count"
 
+const local_publishEndpoint =  "http://127.0.0.1:3000/publish"
+const local_countEndpoint = "http://127.0.0.1:3000/count"
+
 const Index = () => {
   const [submissionCount, setSubmissionCount] = useState(0);
 
@@ -44,7 +47,8 @@ const Index = () => {
         throw new Error("Failed to fetch submission count");
       }
 
-      const data: { amountFiled?: number } = await response.json();
+      const data = await response.json();
+      console.log(data)
 
       if (typeof data.amountFiled === "number") {
         setSubmissionCount(data.amountFiled);
