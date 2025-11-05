@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -21,6 +21,9 @@ const grievanceSchema = z.object({
 
 type GrievanceFormValues = z.infer<typeof grievanceSchema>;
 
+const publishEndpoint =  "https://m5z5ph9dud.execute-api.us-east-2.amazonaws.com/Prod/publish"
+const countEndpoint = "https://m5z5ph9dud.execute-api.us-east-2.amazonaws.com/Prod/count"
+
 const Index = () => {
   const [submissionCount, setSubmissionCount] = useState(0);
 
@@ -33,12 +36,36 @@ const Index = () => {
     },
   });
 
+  const fetchSubmissionCount = useCallback(async () => {
+    try {
+      const response = await fetch(countEndpoint);
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch submission count");
+      }
+
+      const data: { amountFiled?: number } = await response.json();
+
+      if (typeof data.amountFiled === "number") {
+        setSubmissionCount(data.amountFiled);
+      } else {
+        console.error("Submission count response is missing amountFiled");
+      }
+    } catch (error) {
+      console.error("Error retrieving submission count:", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchSubmissionCount();
+  }, [fetchSubmissionCount]);
+
   const onSubmit = async (data: GrievanceFormValues) => {
     console.log("Grievance submitted:", data);
     
     try {
       // TODO: Replace with actual backend endpoint URL
-      const response = await fetch('https://m5z5ph9dud.execute-api.us-east-2.amazonaws.com/Prod/publish', {
+      const response = await fetch(publishEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -58,7 +85,7 @@ const Index = () => {
       const result = await response.json();
       console.log("Backend response:", result);
 
-      setSubmissionCount((prev) => prev + 1);
+      await fetchSubmissionCount();
       toast.success("Grievance filed successfully!", {
         description: "Connor will look at this soon potentially",
       });
@@ -122,7 +149,7 @@ const Index = () => {
                       <FormLabel>Grievance here please</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="What did I do this time?"
+                          placeholder="Audrey tell me!"
                           className="min-h-[120px] resize-none transition-all duration-300 focus:shadow-[var(--shadow-soft)]"
                           {...field}
                         />
